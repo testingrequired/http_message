@@ -6,7 +6,7 @@ use crate::models::{
 /// A partial HTTP request that might not conform to HTTP spec
 ///
 /// A templated HTTP request message is an example use case.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct PartialHttpRequest {
     pub uri: String,
     pub method: String,
