@@ -1,8 +1,8 @@
-use crate::models::partial_request::PartialHttpRequest;
+use crate::models::{partial_request::PartialHttpRequest, version::HttpVersion};
 
 pub mod models;
 
-pub fn parse(input: &str) -> PartialHttpRequest {
+pub fn parse_request(input: &str) -> PartialHttpRequest {
     let input_lines: Vec<_> = input.lines().collect();
 
     if input_lines.len() == 0 {
@@ -10,7 +10,7 @@ pub fn parse(input: &str) -> PartialHttpRequest {
     }
 
     let first_line = input_lines.first().cloned().unwrap();
-    let (method, uri) = parse_first_line(first_line);
+    let (method, uri, http_version) = parse_first_line(first_line);
 
     let empty_line_index = input_lines.iter().position(|line| line.is_empty());
 
@@ -31,10 +31,11 @@ pub fn parse(input: &str) -> PartialHttpRequest {
         method,
         headers,
         body,
+        http_version,
     }
 }
 
-fn parse_first_line(first_line: &str) -> (String, String) {
+fn parse_first_line(first_line: &str) -> (String, String, Option<HttpVersion>) {
     let parts: Vec<_> = first_line.split_whitespace().collect();
 
     if parts.len() == 0 {
@@ -43,6 +44,11 @@ fn parse_first_line(first_line: &str) -> (String, String) {
 
     let method = parts.first().cloned().unwrap();
     let uri = parts.get(1).cloned().unwrap();
+    let http_version = parts.get(2).cloned();
 
-    (method.to_string(), uri.to_string())
+    (
+        method.to_string(),
+        uri.to_string(),
+        http_version.map(|s| s.into()),
+    )
 }

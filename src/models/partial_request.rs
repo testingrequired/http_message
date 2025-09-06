@@ -1,6 +1,7 @@
 use crate::models::{
     body::{HttpBody, PossibleHttpBody},
     headers::HttpHeaders,
+    version::HttpVersion,
 };
 
 /// A partial HTTP request that might not conform to HTTP spec
@@ -10,6 +11,7 @@ use crate::models::{
 pub struct PartialHttpRequest {
     pub uri: String,
     pub method: String,
+    pub http_version: Option<HttpVersion>,
     pub headers: Vec<String>,
     pub body: PossibleHttpBody,
 }
@@ -21,6 +23,7 @@ impl PartialHttpRequest {
             method: String::from("GET"),
             headers,
             body: None,
+            http_version: Default::default(),
         }
     }
 
@@ -30,6 +33,19 @@ impl PartialHttpRequest {
             method: String::from("POST"),
             headers,
             body,
+            http_version: Default::default(),
+        }
+    }
+}
+
+impl Default for PartialHttpRequest {
+    fn default() -> Self {
+        Self {
+            uri: String::from("https://example.com"),
+            method: String::from("GET"),
+            http_version: Some("HTTP/1.1".into()),
+            headers: Default::default(),
+            body: Default::default(),
         }
     }
 }

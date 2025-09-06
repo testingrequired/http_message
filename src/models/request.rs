@@ -3,6 +3,7 @@ use crate::models::{
     headers::{HttpHeader, HttpHeaders},
     partial_request::PartialHttpRequest,
     uri::Uri,
+    version::HttpVersion,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -38,6 +39,7 @@ pub struct HttpRequest {
     pub method: HttpMethod,
     pub headers: Vec<HttpHeader>,
     pub body: PossibleHttpBody,
+    pub http_version: Option<HttpVersion>,
 }
 
 impl HttpRequest {
@@ -47,6 +49,7 @@ impl HttpRequest {
             method: HttpMethod::GET,
             headers,
             body: None,
+            http_version: Default::default(),
         }
     }
 
@@ -56,6 +59,7 @@ impl HttpRequest {
             method: HttpMethod::POST,
             headers,
             body,
+            http_version: Default::default(),
         }
     }
 }
@@ -107,43 +111,59 @@ impl From<PartialHttpRequest> for HttpRequest {
                 .map(|header| header.as_str().into())
                 .collect(),
             body: value.body,
+            http_version: value.http_version.or(Some("HTTP/1.1".into())),
         }
     }
 }
 
 #[cfg(test)]
 mod from_partial_request_tests {
-    use crate::models::{partial_request::PartialHttpRequest, request::HttpRequest};
+    use crate::models::{partial_request::PartialHttpRequest, request::HttpRequest, uri::Uri};
 
     #[test]
     fn from_partial_request_get() {
-        let partial_request =
-            PartialHttpRequest::get("https://example.com", vec!["x-api-key: abc123".to_string()]);
+        let partial_request = PartialHttpRequest {
+            uri: "https://example.com".to_string(),
+            method: "GET".to_string(),
+            http_version: Some("HTTP/1.1".into()),
+            headers: vec!["x-api-key: abc123".to_string()],
+            body: None,
+        };
 
         let request: HttpRequest = partial_request.into();
 
         assert_eq!(
-            HttpRequest::get("https://example.com", vec!["x-api-key: abc123".into()]),
+            HttpRequest {
+                uri: Uri::new("https://example.com"),
+                method: "GET".into(),
+                http_version: Some("HTTP/1.1".into()),
+                headers: vec!["x-api-key: abc123".into()],
+                body: None,
+            },
             request
         );
     }
 
     #[test]
     fn from_partial_request_post() {
-        let partial_request = PartialHttpRequest::post(
-            "https://example.com",
-            vec!["x-api-key: abc123".to_string()],
-            None,
-        );
+        let partial_request = PartialHttpRequest {
+            uri: "https://example.com".to_string(),
+            method: "POST".to_string(),
+            http_version: Some("HTTP/1.1".into()),
+            headers: vec!["x-api-key: abc123".to_string()],
+            body: Some("request body".to_string()),
+        };
 
         let request: HttpRequest = partial_request.into();
 
         assert_eq!(
-            HttpRequest::post(
-                "https://example.com",
-                vec!["x-api-key: abc123".into()],
-                None
-            ),
+            HttpRequest {
+                uri: Uri::new("https://example.com"),
+                method: "POST".into(),
+                http_version: Some("HTTP/1.1".into()),
+                headers: vec!["x-api-key: abc123".into()],
+                body: Some("request body".to_string()),
+            },
             request
         );
     }
