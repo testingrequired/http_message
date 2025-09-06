@@ -2,7 +2,7 @@ use std::fs;
 
 use http_message::{
     models::{partial_request::PartialHttpRequest, request::HttpRequest, uri::Uri},
-    parse_request,
+    parse::parse_request,
 };
 
 #[test]
