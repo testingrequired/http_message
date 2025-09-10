@@ -53,8 +53,8 @@ impl From<&str> for HttpHeader {
 pub trait HttpHeaders {
     type Header;
 
-    fn headers(&self) -> &Vec<Self::Header>;
-    fn get_header(&self, key: &str) -> Option<&Self::Header>;
+    fn headers(&self) -> Vec<Self::Header>;
+    fn get_header(&self, key: &str) -> Option<Self::Header>;
     fn get_header_mut(&mut self, key: &str) -> Option<&mut Self::Header>;
     fn set_header(&mut self, key: &str, value: &str);
 }

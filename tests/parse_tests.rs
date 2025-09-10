@@ -5,6 +5,8 @@ use http_message::{
     parse::parse_request,
 };
 
+use pretty_assertions::assert_eq;
+
 #[test]
 fn parse_get_request() {
     let content =
@@ -13,13 +15,14 @@ fn parse_get_request() {
     let partial: PartialHttpRequest = parse_request(&content);
 
     assert_eq!(
-        PartialHttpRequest {
-            uri: "https://example.com".to_string(),
-            method: "GET".to_string(),
-            http_version: Some("HTTP/1.1".into()),
-            headers: vec![],
-            body: None
-        },
+        PartialHttpRequest::new(
+            include_str!("../tests/fixtures/get.request"),
+            Some(4..23),
+            Some(0..3),
+            Some(24..32),
+            vec![],
+            None
+        ),
         partial
     );
 
@@ -45,13 +48,14 @@ fn parse_get_without_http_version_request() {
     let partial: PartialHttpRequest = parse_request(&content);
 
     assert_eq!(
-        PartialHttpRequest {
-            uri: "https://example.com".to_string(),
-            method: "GET".to_string(),
-            http_version: None,
-            headers: vec![],
-            body: None
-        },
+        PartialHttpRequest::new(
+            include_str!("../tests/fixtures/get_without_http_version.request"),
+            Some(4..23),
+            Some(0..3),
+            None,
+            vec![],
+            None
+        ),
         partial
     );
 
@@ -77,13 +81,14 @@ fn parse_get_with_headers_request() {
     let partial = parse_request(&content);
 
     assert_eq!(
-        PartialHttpRequest {
-            uri: "https://example.com".to_string(),
-            method: "GET".to_string(),
-            http_version: Some("HTTP/1.1".into()),
-            headers: vec!["x-api-key: abc123".into()],
-            body: None
-        },
+        PartialHttpRequest::new(
+            include_str!("../tests/fixtures/get_with_headers.request"),
+            Some(4..23),
+            Some(0..3),
+            Some(24..32),
+            vec![33..50],
+            None
+        ),
         partial
     );
 
@@ -108,14 +113,22 @@ fn parse_post_with_headers_and_body_request() {
 
     let partial = parse_request(&content);
 
+    let input = include_str!("../tests/fixtures/post_with_headers_and_body.request");
+    let method = Some(0..4);
+    let uri = Some(5..24);
+    let http_version = Some(25..33);
+    let headers = vec![34..51]; // 33..34 \n
+    let body = Some(53..64);
+
+    eprintln!(
+        "33..50: {}; 50..51: {}; 51..62: {};",
+        &input[33..50],
+        &input[50..51],
+        &input[51..62]
+    );
+
     assert_eq!(
-        PartialHttpRequest {
-            uri: "https://example.com".to_string(),
-            method: "POST".to_string(),
-            http_version: Some("HTTP/1.1".into()),
-            headers: vec!["x-api-key: abc123".into()],
-            body: Some(String::from(r#"{"id": 100}"#))
-        },
+        PartialHttpRequest::new(input, uri, method, http_version, headers, body),
         partial
     );
 
@@ -141,13 +154,14 @@ fn parse_post_with_body_request() {
     let partial = parse_request(&content);
 
     assert_eq!(
-        PartialHttpRequest {
-            uri: "https://example.com".to_string(),
-            method: "POST".to_string(),
-            http_version: Some("HTTP/1.1".into()),
-            headers: vec![],
-            body: Some(String::from(r#"{"id": 100}"#))
-        },
+        PartialHttpRequest::new(
+            include_str!("../tests/fixtures/post_with_body.request"),
+            Some(5..24),
+            Some(0..4),
+            Some(25..33),
+            vec![],
+            Some(35..46)
+        ),
         partial
     );
 

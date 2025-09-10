@@ -4,6 +4,10 @@ use core::fmt;
 pub struct HttpVersion(String);
 
 impl HttpVersion {
+    pub fn new(version: &str) -> Self {
+        Self(version.to_string())
+    }
+
     fn is_prefixed(&self) -> bool {
         self.0.starts_with("HTTP/")
     }

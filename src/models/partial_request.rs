@@ -1,89 +1,75 @@
-use crate::models::{
-    body::{HttpBody, PossibleHttpBody},
-    headers::HttpHeaders,
-    version::HttpVersion,
-};
+use std::ops::Range;
+
+use crate::models::body::PossibleHttpBody;
 
 /// A partial HTTP request that might not conform to HTTP spec
 ///
 /// A templated HTTP request message is an example use case.
 #[derive(Debug, Clone, PartialEq)]
 pub struct PartialHttpRequest {
-    pub uri: String,
-    pub method: String,
-    pub http_version: Option<HttpVersion>,
-    pub headers: Vec<String>,
-    pub body: PossibleHttpBody,
+    message: String,
+    uri: Option<Range<usize>>,
+    method: Option<Range<usize>>,
+    http_version: Option<Range<usize>>,
+    headers: Vec<Range<usize>>,
+    body: Option<Range<usize>>,
 }
 
 impl PartialHttpRequest {
-    pub fn get(uri: &str, headers: Vec<String>) -> Self {
+    pub fn new(
+        message: &str,
+        uri: Option<Range<usize>>,
+        method: Option<Range<usize>>,
+        http_version: Option<Range<usize>>,
+        headers: Vec<Range<usize>>,
+        body: Option<Range<usize>>,
+    ) -> Self {
         Self {
-            uri: uri.to_string(),
-            method: String::from("GET"),
-            headers,
-            body: None,
-            http_version: Default::default(),
-        }
-    }
-
-    pub fn post(uri: &str, headers: Vec<String>, body: PossibleHttpBody) -> Self {
-        Self {
-            uri: uri.to_string(),
-            method: String::from("POST"),
+            message: message.to_string(),
+            uri,
+            method,
+            http_version,
             headers,
             body,
-            http_version: Default::default(),
-        }
-    }
-}
-
-impl Default for PartialHttpRequest {
-    fn default() -> Self {
-        Self {
-            uri: String::from("https://example.com"),
-            method: String::from("GET"),
-            http_version: Some("HTTP/1.1".into()),
-            headers: Default::default(),
-            body: Default::default(),
-        }
-    }
-}
-
-impl HttpHeaders for PartialHttpRequest {
-    type Header = String;
-
-    fn headers(&self) -> &Vec<Self::Header> {
-        &self.headers
-    }
-
-    fn get_header(&self, key: &str) -> Option<&String> {
-        self.headers.iter().find(|header| header.starts_with(key))
-    }
-
-    /// Set or update header by key
-    fn set_header(&mut self, key: &str, value: &str) {
-        let existing_header: Option<&mut String> = self.get_header_mut(key);
-        if let Some(header) = existing_header {
-            *header = format!("{key}: {value}");
-        } else {
-            self.headers.push(format!("{key}: {value}"));
         }
     }
 
-    fn get_header_mut(&mut self, key: &str) -> Option<&mut String> {
+    pub fn uri(&self) -> Option<String> {
+        self.uri
+            .as_ref()
+            .map(|span| self.message[span.start..span.end].to_string())
+    }
+
+    pub fn method(&self) -> Option<String> {
+        self.method
+            .as_ref()
+            .map(|span| self.message[span.start..span.end].to_string())
+    }
+
+    pub fn http_version(&self) -> Option<String> {
+        self.http_version
+            .as_ref()
+            .map(|span| self.message[span.start..span.end].to_string())
+    }
+
+    pub fn headers(&self) -> Vec<String> {
         self.headers
-            .iter_mut()
-            .find(|header| header.starts_with(key))
-    }
-}
-
-impl HttpBody for PartialHttpRequest {
-    fn get_body(&self) -> &PossibleHttpBody {
-        &self.body
+            .iter()
+            .map(|span| self.message[span.start..span.end].to_string())
+            .collect()
     }
 
-    fn set_body(&mut self, value: PossibleHttpBody) {
-        self.body = value;
+    pub fn get_header(&self, key: &str) -> Option<String> {
+        self.headers
+            .clone()
+            .into_iter()
+            .find(|span| self.message[span.start..span.end].starts_with(&format!("{key}:")))
+            .map(|span| self.message[span.start..span.end].to_string())
+    }
+
+    pub fn get_body(&self) -> PossibleHttpBody {
+        self.body
+            .as_ref()
+            .map(|body| self.message[body.start..body.end].to_string())
     }
 }

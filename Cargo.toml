@@ -5,3 +5,6 @@ edition = "2024"
 
 [dependencies]
 url = "2.5.7"
+
+[dev-dependencies]
+pretty_assertions = "1"

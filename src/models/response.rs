@@ -2,7 +2,7 @@ use core::fmt;
 
 use crate::models::{
     body::{HttpBody, PossibleHttpBody},
-    headers::{HttpHeader, HttpHeaders},
+    headers::HttpHeader,
 };
 
 #[derive(Debug, Clone)]
@@ -20,20 +20,16 @@ impl HttpResponse {
             body: body.map(|b| b.to_string()),
         }
     }
-}
 
-impl HttpHeaders for HttpResponse {
-    type Header = HttpHeader;
-
-    fn headers(&self) -> &Vec<HttpHeader> {
+    pub fn headers(&self) -> &Vec<HttpHeader> {
         &self.headers
     }
 
-    fn get_header(&self, key: &str) -> Option<&HttpHeader> {
+    pub fn get_header(&self, key: &str) -> Option<&HttpHeader> {
         self.headers.iter().find(|header| header.key() == key)
     }
 
-    fn set_header(&mut self, key: &str, value: &str) {
+    pub fn set_header(&mut self, key: &str, value: &str) {
         let existing_header: Option<&mut HttpHeader> = self.get_header_mut(key);
         if let Some(header) = existing_header {
             *header = (key, value).into();
@@ -42,7 +38,7 @@ impl HttpHeaders for HttpResponse {
         }
     }
 
-    fn get_header_mut(&mut self, key: &str) -> Option<&mut HttpHeader> {
+    pub fn get_header_mut(&mut self, key: &str) -> Option<&mut HttpHeader> {
         self.headers.iter_mut().find(|header| header.key() == key)
     }
 }
