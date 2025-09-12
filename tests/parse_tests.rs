@@ -32,7 +32,7 @@ fn parse_get_request() {
         HttpRequest {
             uri: Uri::new("https://example.com"),
             method: "GET".into(),
-            http_version: Some("HTTP/1.1".into()),
+            http_version: "HTTP/1.1".into(),
             headers: vec![],
             body: None
         },
@@ -65,7 +65,7 @@ fn parse_get_without_http_version_request() {
         HttpRequest {
             uri: Uri::new("https://example.com"),
             method: "GET".into(),
-            http_version: Some("HTTP/1.1".into()),
+            http_version: "HTTP/1.1".into(),
             headers: vec![],
             body: None
         },
@@ -98,7 +98,7 @@ fn parse_get_with_headers_request() {
         HttpRequest {
             uri: Uri::new("https://example.com"),
             method: "GET".into(),
-            http_version: Some("HTTP/1.1".into()),
+            http_version: "HTTP/1.1".into(),
             headers: vec!["x-api-key: abc123".into()],
             body: None
         },
@@ -130,7 +130,7 @@ fn parse_post_with_headers_and_body_request() {
         HttpRequest {
             uri: Uri::new("https://example.com"),
             method: "POST".into(),
-            http_version: Some("HTTP/1.1".into()),
+            http_version: "HTTP/1.1".into(),
             headers: vec!["x-api-key: abc123".into()],
             body: Some(String::from(r#"{"id": 100}"#))
         },
@@ -163,7 +163,7 @@ fn parse_post_with_body_request() {
         HttpRequest {
             uri: Uri::new("https://example.com"),
             method: "POST".into(),
-            http_version: Some("HTTP/1.1".into()),
+            http_version: "HTTP/1.1".into(),
             headers: vec![],
             body: Some(String::from(r#"{"id": 100}"#))
         },

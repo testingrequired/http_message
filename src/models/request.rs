@@ -37,9 +37,9 @@ impl From<&str> for HttpMethod {
 pub struct HttpRequest {
     pub uri: Uri,
     pub method: HttpMethod,
+    pub http_version: HttpVersion,
     pub headers: Vec<HttpHeader>,
     pub body: PossibleHttpBody,
-    pub http_version: Option<HttpVersion>,
 }
 
 impl HttpRequest {
@@ -47,9 +47,9 @@ impl HttpRequest {
         Self {
             uri: Uri::new(uri),
             method: HttpMethod::GET,
+            http_version: Default::default(),
             headers,
             body: None,
-            http_version: Default::default(),
         }
     }
 
@@ -114,7 +114,8 @@ impl From<PartialHttpRequest> for HttpRequest {
             http_version: value
                 .http_version()
                 .map(|version| HttpVersion::new(&version))
-                .or(Some("HTTP/1.1".into())),
+                .or(Some("HTTP/1.1".into()))
+                .unwrap(),
         }
     }
 }
@@ -145,7 +146,7 @@ mod from_partial_request_tests {
             HttpRequest {
                 uri: Uri::new("https://example.com"),
                 method: "GET".into(),
-                http_version: Some("HTTP/1.1".into()),
+                http_version: "HTTP/1.1".into(),
                 headers: vec!["x-api-key: abc123".into()],
                 body: None,
             },
@@ -175,7 +176,7 @@ mod from_partial_request_tests {
             HttpRequest {
                 uri: Uri::new("https://example.com"),
                 method: "POST".into(),
-                http_version: Some("HTTP/1.1".into()),
+                http_version: "HTTP/1.1".into(),
                 headers: vec!["x-api-key: abc123".into()],
                 body: Some("request body".to_string()),
             },
