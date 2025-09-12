@@ -7,8 +7,6 @@ pub fn parse_request(input: &str) -> PartialHttpRequest {
 
     let first_empty_line = line_spans.iter().position(|span| span.len() == 1);
 
-    dbg!(&line_spans);
-
     let (method, uri, http_version) = line_spans
         .first()
         .map(|span| parse_first_line(&input[span.clone()]))
