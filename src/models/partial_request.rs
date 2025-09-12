@@ -6,8 +6,8 @@ use crate::models::body::PossibleHttpBody;
 ///
 /// A templated HTTP request message is an example use case.
 #[derive(Debug, Clone, PartialEq)]
-pub struct PartialHttpRequest {
-    message: String,
+pub struct PartialHttpRequest<'a> {
+    message: &'a str,
     uri: Option<Range<usize>>,
     method: Option<Range<usize>>,
     http_version: Option<Range<usize>>,
@@ -15,9 +15,9 @@ pub struct PartialHttpRequest {
     body: Option<Range<usize>>,
 }
 
-impl PartialHttpRequest {
+impl<'a> PartialHttpRequest<'a> {
     pub fn new(
-        message: &str,
+        message: &'a str,
         uri: Option<Range<usize>>,
         method: Option<Range<usize>>,
         http_version: Option<Range<usize>>,
@@ -25,7 +25,7 @@ impl PartialHttpRequest {
         body: Option<Range<usize>>,
     ) -> Self {
         Self {
-            message: message.to_string(),
+            message,
             uri,
             method,
             http_version,
