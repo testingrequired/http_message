@@ -86,7 +86,7 @@ fn parse_get_with_headers_request() {
             Some(4..23),
             Some(0..3),
             Some(24..32),
-            vec![33..50],
+            vec![33..51],
             None
         ),
         partial
@@ -113,22 +113,14 @@ fn parse_post_with_headers_and_body_request() {
 
     let partial = parse_request(&content);
 
-    let input = include_str!("../tests/fixtures/post_with_headers_and_body.request");
     let method = Some(0..4);
     let uri = Some(5..24);
     let http_version = Some(25..33);
-    let headers = vec![34..51]; // 33..34 \n
+    let headers = vec![34..52];
     let body = Some(53..64);
 
-    eprintln!(
-        "33..50: {}; 50..51: {}; 51..62: {};",
-        &input[33..50],
-        &input[50..51],
-        &input[51..62]
-    );
-
     assert_eq!(
-        PartialHttpRequest::new(input, uri, method, http_version, headers, body),
+        PartialHttpRequest::new(&content, uri, method, http_version, headers, body),
         partial
     );
 

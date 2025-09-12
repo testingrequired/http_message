@@ -1,76 +1,47 @@
 use std::ops::Range;
 
-use crate::{models::partial_request::PartialHttpRequest, span::LineSpans};
+use crate::{models::partial_request::PartialHttpRequest, span::get_line_spans};
 
 pub fn parse_request(input: &str) -> PartialHttpRequest {
-    let lines_count = input.lines().count();
+    let line_spans = get_line_spans(input);
 
-    let binding: LineSpans = input.lines().fold(vec![None], |mut acc, line| {
-        let prev = acc.last().unwrap();
-
-        if line.trim().is_empty() {
-            acc.push(None);
-
-            return acc;
-        }
-
-        match prev {
-            Some(prev) => {
-                // Last line
-                if acc.len() == lines_count {
-                    acc.push(Some(prev.end..prev.end + line.len()));
-                // Other lines
-                } else {
-                    acc.push(Some(prev.end..prev.end + line.len()));
-                }
-            }
-            None => {
-                // First line
-                acc.push(Some(0..line.len()))
-            }
-        }
-
-        acc
-    });
-
-    let line_spans: Vec<Range<usize>> = binding
-        .iter()
-        .skip(1)
-        .map(|span| span.clone().unwrap_or(0..0))
-        .collect();
+    let first_empty_line = line_spans.iter().position(|span| span.len() == 1);
 
     dbg!(&line_spans);
 
-    if line_spans.len() == 0 {
-        panic!("Requests can't be empty");
-    }
-
-    let first_line = line_spans
+    let (method, uri, http_version) = line_spans
         .first()
-        .map(|first_line_span| &input[first_line_span.start..first_line_span.end])
-        .unwrap();
+        .map(|span| parse_first_line(&input[span.clone()]))
+        .unwrap_or((None, None, None));
 
-    let (method, uri, http_version) = parse_first_line(first_line);
+    let (header_spans, body_spans) = match first_empty_line {
+        Some(first_empty_line_idx) => {
+            let header_spans = line_spans.clone()[1..first_empty_line_idx].to_vec();
 
-    let empty_line_index = line_spans
-        .iter()
-        .position(|line_span| line_span.start == line_span.end);
+            (
+                header_spans,
+                Some(line_spans.clone()[first_empty_line_idx..].to_vec()),
+            )
+        }
+        None => {
+            let header_spans = line_spans.clone()[1..].to_vec();
 
-    eprintln!("Empty line index: {:?}", empty_line_index);
-
-    let headers: Vec<_> = empty_line_index
-        .map(|index| &line_spans[1..index + 1])
-        .unwrap_or(&line_spans[1..])
-        .into_iter()
-        .map(|x| (*x).clone())
-        .collect();
-
-    let body = match &empty_line_index {
-        Some(index) => Some(line_spans[*index + 1].start..input.len()),
-        None => None,
+            (header_spans, None)
+        }
     };
 
-    PartialHttpRequest::new(input, uri, method, http_version, headers.to_vec(), body)
+    let body_span = body_spans.and_then(|spans| {
+        if spans.is_empty() {
+            return None;
+        }
+
+        let first = spans.first().unwrap();
+        let last = spans.last().unwrap();
+
+        Some(first.start + 1..last.end)
+    });
+
+    PartialHttpRequest::new(input, uri, method, http_version, header_spans, body_span)
 }
 
 fn parse_first_line(
