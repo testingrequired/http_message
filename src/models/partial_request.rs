@@ -1,3 +1,4 @@
+use core::fmt;
 use std::{ops::Range, str::FromStr};
 
 use crate::{error::Error, span::get_line_spans};
@@ -13,6 +14,12 @@ pub struct PartialHttpRequest {
     http_version: Option<Range<usize>>,
     headers: Vec<Range<usize>>,
     body: Option<Range<usize>>,
+}
+
+impl fmt::Display for PartialHttpRequest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.message())
+    }
 }
 
 impl PartialHttpRequest {
