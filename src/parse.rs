@@ -2,7 +2,7 @@ use std::ops::Range;
 
 use crate::{models::partial_request::PartialHttpRequest, span::get_line_spans};
 
-pub fn parse_request(input: &str) -> PartialHttpRequest {
+pub(crate) fn parse_request(input: &str) -> PartialHttpRequest {
     let line_spans = get_line_spans(input);
 
     let first_empty_line = line_spans.iter().position(|span| span.len() == 1);

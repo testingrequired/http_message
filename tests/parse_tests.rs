@@ -1,9 +1,7 @@
-use std::fs;
+use std::{fs, str::FromStr};
 
-use http_message::{
-    models::{partial_request::PartialHttpRequest, request::HttpRequest, uri::Uri},
-    parse::parse_request,
-};
+use http_message::PartialHttpRequest;
+use http_message::models::{request::HttpRequest, uri::Uri};
 
 use pretty_assertions::assert_eq;
 
@@ -12,7 +10,7 @@ fn parse_get_request() {
     let content =
         fs::read_to_string("./tests/fixtures/get.request").expect("should read test fixture");
 
-    let partial: PartialHttpRequest = parse_request(&content);
+    let partial = PartialHttpRequest::from_str(&content).expect("should be parsable");
 
     assert_eq!(
         PartialHttpRequest::new(
@@ -45,7 +43,7 @@ fn parse_get_without_http_version_request() {
     let content = fs::read_to_string("./tests/fixtures/get_without_http_version.request")
         .expect("should read test fixture");
 
-    let partial: PartialHttpRequest = parse_request(&content);
+    let partial = PartialHttpRequest::from_str(&content).expect("should be parsable");
 
     assert_eq!(
         PartialHttpRequest::new(
@@ -78,7 +76,7 @@ fn parse_get_with_headers_request() {
     let content = fs::read_to_string("./tests/fixtures/get_with_headers.request")
         .expect("should read test fixture");
 
-    let partial = parse_request(&content);
+    let partial = PartialHttpRequest::from_str(&content).expect("should be parsable");
 
     assert_eq!(
         PartialHttpRequest::new(
@@ -111,7 +109,7 @@ fn parse_post_with_headers_and_body_request() {
     let content = fs::read_to_string("./tests/fixtures/post_with_headers_and_body.request")
         .expect("should read test fixture");
 
-    let partial = parse_request(&content);
+    let partial = PartialHttpRequest::from_str(&content).expect("should be parsable");
 
     let method = Some(0..4);
     let uri = Some(5..24);
@@ -143,7 +141,7 @@ fn parse_post_with_body_request() {
     let content = fs::read_to_string("./tests/fixtures/post_with_body.request")
         .expect("should read test fixture");
 
-    let partial = parse_request(&content);
+    let partial = PartialHttpRequest::from_str(&content).expect("should be parsable");
 
     assert_eq!(
         PartialHttpRequest::new(

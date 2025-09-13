@@ -1,3 +1,5 @@
 pub mod models;
-pub mod parse;
+mod parse;
 pub mod span;
+
+pub use models::partial_request::PartialHttpRequest;

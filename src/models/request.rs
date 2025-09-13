@@ -96,23 +96,19 @@ impl HttpBody for HttpRequest {
     }
 }
 
-impl<'a> From<PartialHttpRequest<'a>> for HttpRequest {
+impl<'a> From<PartialHttpRequest> for HttpRequest {
     fn from(value: PartialHttpRequest) -> Self {
         Self {
-            uri: Uri::new(&value.uri().expect("should have a uri")),
-            method: value
-                .method()
-                .expect("should have a method")
-                .as_str()
-                .into(),
+            uri: Uri::new(&value.uri_str().expect("should have a uri")),
+            method: value.method_str().expect("should have a method").into(),
             headers: value
-                .headers()
-                .iter()
-                .map(|header| header.as_str().into())
+                .header_strs()
+                .into_iter()
+                .map(|header| header.into())
                 .collect(),
-            body: value.get_body(),
+            body: value.body_str().map(|body| body.to_string()),
             http_version: value
-                .http_version()
+                .http_version_str()
                 .map(|version| HttpVersion::new(&version))
                 .or(Some("HTTP/1.1".into()))
                 .unwrap(),
