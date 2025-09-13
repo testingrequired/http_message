@@ -20,3 +20,5 @@ fn main() {
     assert_eq!(Some(24..34), partial.header_span("x-key"));
 }
 ```
+
+[![Verify](https://github.com/testingrequired/http_message/actions/workflows/verify.yml/badge.svg)](https://github.com/testingrequired/http_message/actions/workflows/verify.yml)
