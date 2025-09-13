@@ -42,6 +42,7 @@ pub(crate) fn parse_request(input: &str) -> PartialHttpRequest {
     PartialHttpRequest::new(input, uri, method, http_version, header_spans, body_span)
 }
 
+/// Parse the first line of an HTTP request message
 fn parse_first_line(
     first_line: &str,
 ) -> (
@@ -49,24 +50,19 @@ fn parse_first_line(
     Option<Range<usize>>,
     Option<Range<usize>>,
 ) {
-    let mut start = 0usize;
-
     let parts: Vec<_> = first_line.split_whitespace().collect();
 
-    if parts.len() == 0 {
-        panic!("Request first line can't be empty");
-    }
+    let mut start = 0;
 
-    let method = parts.first().cloned().unwrap();
-    let method_span = start..start + method.len();
-    start = method_span.end + 1;
+    let mut get_span = |part: &str| {
+        let span = start..start + part.len();
+        start = span.end + 1;
+        span
+    };
 
-    let uri = parts.get(1).cloned().unwrap();
-    let uri_span = start..start + uri.len();
-    start = uri_span.end + 1;
+    let method_span = parts.get(0).map(|&method| get_span(method));
+    let uri_span = parts.get(1).map(|&uri| get_span(uri));
+    let http_version_span = parts.get(2).map(|&version| get_span(version));
 
-    let http_version = parts.get(2).cloned();
-    let http_version_span = http_version.map(|http_version| start..start + http_version.len());
-
-    (Some(method_span), Some(uri_span), http_version_span)
+    (method_span, uri_span, http_version_span)
 }
