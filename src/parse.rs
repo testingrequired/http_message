@@ -3,6 +3,17 @@ use std::ops::Range;
 use crate::{error::Error, models::partial_request::PartialHttpRequest, span::get_line_spans};
 
 pub(crate) fn parse_request(input: &str) -> Result<PartialHttpRequest, Error> {
+    if input.trim().is_empty() {
+        return Ok(PartialHttpRequest::new(
+            input,
+            None,
+            None,
+            None,
+            vec![],
+            None,
+        ));
+    }
+
     let line_spans = get_line_spans(input);
 
     let first_empty_line_idx = line_spans.iter().position(|span| span.len() == 1);

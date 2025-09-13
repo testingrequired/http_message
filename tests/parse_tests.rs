@@ -6,6 +6,32 @@ use http_message::models::{request::HttpRequest, uri::Uri};
 use pretty_assertions::assert_eq;
 
 #[test]
+fn parse_empty_request() {
+    let content =
+        fs::read_to_string("./tests/fixtures/empty.request").expect("should read test fixture");
+
+    let partial = PartialHttpRequest::from_str(&content).expect("should be parsable");
+
+    assert_eq!(
+        PartialHttpRequest::new(&content, None, None, None, vec![], None),
+        partial
+    );
+}
+
+#[test]
+fn parse_whitespace_request() {
+    let content = fs::read_to_string("./tests/fixtures/whitespace.request")
+        .expect("should read test fixture");
+
+    let partial = PartialHttpRequest::from_str(&content).expect("should be parsable");
+
+    assert_eq!(
+        PartialHttpRequest::new(&content, None, None, None, vec![], None),
+        partial
+    );
+}
+
+#[test]
 fn parse_get_request() {
     let content =
         fs::read_to_string("./tests/fixtures/get.request").expect("should read test fixture");
