@@ -18,8 +18,8 @@ pub struct PartialHttpRequest {
 impl PartialHttpRequest {
     pub fn new(
         message: &str,
-        uri: Option<Range<usize>>,
         method: Option<Range<usize>>,
+        uri: Option<Range<usize>>,
         http_version: Option<Range<usize>>,
         headers: Vec<Range<usize>>,
         body: Option<Range<usize>>,
@@ -154,8 +154,8 @@ where
 
     Ok(PartialHttpRequest::new(
         input,
-        uri,
         method,
+        uri,
         http_version,
         header_spans,
         body_span,
@@ -236,8 +236,8 @@ mod tests {
         assert_eq!(
             PartialHttpRequest::new(
                 "GET https://example.com HTTP/1.1",
-                Some(4..23),
                 Some(0..3),
+                Some(4..23),
                 Some(24..32),
                 vec![],
                 None

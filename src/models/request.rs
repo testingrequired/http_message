@@ -129,8 +129,8 @@ mod from_partial_request_tests {
         GET https://example.com HTTP/1.1
         x-api-key: abc123
         "#,
-            Some(13..32),
             Some(9..12),
+            Some(13..32),
             Some(33..41),
             vec![50..67],
             None,

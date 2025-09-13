@@ -41,8 +41,8 @@ fn parse_get_request() {
     assert_eq!(
         PartialHttpRequest::new(
             include_str!("../tests/fixtures/get.request"),
-            Some(4..23),
             Some(0..3),
+            Some(4..23),
             Some(24..32),
             vec![],
             None
@@ -74,8 +74,8 @@ fn parse_get_without_http_version_request() {
     assert_eq!(
         PartialHttpRequest::new(
             include_str!("../tests/fixtures/get_without_http_version.request"),
-            Some(4..23),
             Some(0..3),
+            Some(4..23),
             None,
             vec![],
             None
@@ -107,8 +107,8 @@ fn parse_get_with_headers_request() {
     assert_eq!(
         PartialHttpRequest::new(
             include_str!("../tests/fixtures/get_with_headers.request"),
-            Some(4..23),
             Some(0..3),
+            Some(4..23),
             Some(24..32),
             vec![33..51],
             None
@@ -144,7 +144,7 @@ fn parse_post_with_headers_and_body_request() {
     let body = Some(53..64);
 
     assert_eq!(
-        PartialHttpRequest::new(&content, uri, method, http_version, headers, body),
+        PartialHttpRequest::new(&content, method, uri, http_version, headers, body),
         partial
     );
 
@@ -172,8 +172,8 @@ fn parse_post_with_body_request() {
     assert_eq!(
         PartialHttpRequest::new(
             include_str!("../tests/fixtures/post_with_body.request"),
-            Some(5..24),
             Some(0..4),
+            Some(5..24),
             Some(25..33),
             vec![],
             Some(35..46)
@@ -205,8 +205,8 @@ fn parse_get_with_multiple_spaces_request() {
     assert_eq!(
         PartialHttpRequest::new(
             &content,
-            Some(5..24),
             Some(0..3),
+            Some(5..24),
             Some(26..34),
             vec![],
             None
