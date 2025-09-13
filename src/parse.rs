@@ -1,30 +1,31 @@
 use std::ops::Range;
 
-use crate::{models::partial_request::PartialHttpRequest, span::get_line_spans};
+use crate::{error::Error, models::partial_request::PartialHttpRequest, span::get_line_spans};
 
-pub(crate) fn parse_request(input: &str) -> PartialHttpRequest {
+pub(crate) fn parse_request(input: &str) -> Result<PartialHttpRequest, Error> {
     let line_spans = get_line_spans(input);
 
-    let first_empty_line = line_spans.iter().position(|span| span.len() == 1);
+    let first_empty_line_idx = line_spans.iter().position(|span| span.len() == 1);
 
-    let (method, uri, http_version) = line_spans
-        .first()
-        .map(|span| parse_first_line(&input[span.clone()]))
+    let first_line = line_spans.first();
+
+    let (method, uri, http_version) = first_line
+        .map(|span| &input[span.clone()])
+        .map(parse_first_line)
         .unwrap_or((None, None, None));
 
-    let (header_spans, body_spans) = match first_empty_line {
-        Some(first_empty_line_idx) => {
-            let header_spans = line_spans.clone()[1..first_empty_line_idx].to_vec();
+    let (header_spans, body_spans) = match first_empty_line_idx {
+        Some(idx) => {
+            let header_spans = line_spans.clone()[1..idx].to_vec();
+            let body_spans = Some(line_spans.clone()[idx..].to_vec());
 
-            (
-                header_spans,
-                Some(line_spans.clone()[first_empty_line_idx..].to_vec()),
-            )
+            (header_spans, body_spans)
         }
         None => {
             let header_spans = line_spans.clone()[1..].to_vec();
+            let body_spans = None;
 
-            (header_spans, None)
+            (header_spans, body_spans)
         }
     };
 
@@ -39,7 +40,14 @@ pub(crate) fn parse_request(input: &str) -> PartialHttpRequest {
         Some(first.start + 1..last.end)
     });
 
-    PartialHttpRequest::new(input, uri, method, http_version, header_spans, body_span)
+    Ok(PartialHttpRequest::new(
+        input,
+        uri,
+        method,
+        http_version,
+        header_spans,
+        body_span,
+    ))
 }
 
 /// Parse the first line of an HTTP request message
