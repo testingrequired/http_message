@@ -34,6 +34,10 @@ impl PartialHttpRequest {
         }
     }
 
+    pub fn message(&self) -> &str {
+        &self.message
+    }
+
     pub fn uri_span(&self) -> Option<Range<usize>> {
         self.uri.clone()
     }
@@ -237,6 +241,8 @@ mod tests {
             ),
             partial
         );
+
+        assert_eq!("GET https://example.com HTTP/1.1", partial.message());
 
         let request: HttpRequest = partial.into();
 
