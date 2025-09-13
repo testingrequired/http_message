@@ -149,36 +149,6 @@ mod from_partial_request_tests {
             request
         );
     }
-
-    #[test]
-    #[ignore = "TODO"]
-    fn from_partial_request_post() {
-        let partial_request = PartialHttpRequest::new(
-            r#"
-        POST https://example.com HTTP/1.1
-        x-api-key: abc123
-
-        request body"#,
-            Some(13..32),
-            Some(9..12),
-            Some(33..41),
-            vec![50..67],
-            None,
-        );
-
-        let request: HttpRequest = partial_request.into();
-
-        assert_eq!(
-            HttpRequest {
-                uri: Uri::new("https://example.com"),
-                method: "POST".into(),
-                http_version: "HTTP/1.1".into(),
-                headers: vec!["x-api-key: abc123".into()],
-                body: Some("request body".to_string()),
-            },
-            request
-        );
-    }
 }
 
 #[cfg(test)]
