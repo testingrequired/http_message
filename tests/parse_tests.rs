@@ -194,3 +194,36 @@ fn parse_post_with_body_request() {
         request
     );
 }
+
+#[test]
+fn parse_get_with_multiple_spaces_request() {
+    let content = fs::read_to_string("./tests/fixtures/get_with_multiple_spaces.request")
+        .expect("should read test fixture");
+
+    let partial = PartialHttpRequest::from_str(&content).expect("should be parsable");
+
+    assert_eq!(
+        PartialHttpRequest::new(
+            &content,
+            Some(5..24),
+            Some(0..3),
+            Some(26..34),
+            vec![],
+            None
+        ),
+        partial
+    );
+
+    let request: HttpRequest = partial.into();
+
+    assert_eq!(
+        HttpRequest {
+            uri: Uri::new("https://example.com"),
+            method: "GET".into(),
+            http_version: "HTTP/1.1".into(),
+            headers: vec![],
+            body: None
+        },
+        request
+    );
+}

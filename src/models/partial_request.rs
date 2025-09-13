@@ -151,19 +151,25 @@ fn parse_first_line(
     Option<Range<usize>>,
     Option<Range<usize>>,
 ) {
-    let parts: Vec<_> = first_line.split_whitespace().collect();
+    let mut parts = vec![];
+    let mut last_end = 0;
 
-    let mut start = 0;
+    for (i, c) in first_line.char_indices() {
+        if c.is_whitespace() {
+            if i > last_end {
+                parts.push(last_end..i);
+            }
+            last_end = i + 1;
+        }
+    }
 
-    let mut get_span = |part: &str| {
-        let span = start..start + part.len();
-        start = span.end + 1;
-        span
-    };
+    if last_end < first_line.len() {
+        parts.push(last_end..first_line.len());
+    }
 
-    let method_span = parts.get(0).map(|&method| get_span(method));
-    let uri_span = parts.get(1).map(|&uri| get_span(uri));
-    let http_version_span = parts.get(2).map(|&version| get_span(version));
+    let method_span = parts.get(0).cloned();
+    let uri_span = parts.get(1).cloned();
+    let http_version_span = parts.get(2).cloned();
 
     (method_span, uri_span, http_version_span)
 }
