@@ -129,31 +129,9 @@ fn parse_request(input: &str) -> Result<PartialHttpRequest, Error> {
         .map(parse_first_line)
         .unwrap_or((None, None, None));
 
-    let (header_spans, body_spans) = match first_empty_line_idx {
-        Some(idx) => {
-            let header_spans = line_spans.clone()[1..idx].to_vec();
-            let body_spans = Some(line_spans.clone()[idx..].to_vec());
+    let (header_spans, body_spans) = get_header_and_body_spans(line_spans, first_empty_line_idx);
 
-            (header_spans, body_spans)
-        }
-        None => {
-            let header_spans = line_spans.clone()[1..].to_vec();
-            let body_spans = None;
-
-            (header_spans, body_spans)
-        }
-    };
-
-    let body_span = body_spans.and_then(|spans| {
-        if spans.is_empty() {
-            return None;
-        }
-
-        let first = spans.first().unwrap();
-        let last = spans.last().unwrap();
-
-        Some(first.start + 1..last.end)
-    });
+    let body_span = get_span_extent_from_spans(body_spans);
 
     Ok(PartialHttpRequest::new(
         input,
@@ -188,4 +166,39 @@ fn parse_first_line(
     let http_version_span = parts.get(2).map(|&version| get_span(version));
 
     (method_span, uri_span, http_version_span)
+}
+
+fn get_header_and_body_spans(
+    line_spans: Vec<Range<usize>>,
+    first_empty_line_idx: Option<usize>,
+) -> (Vec<Range<usize>>, Option<Vec<Range<usize>>>) {
+    let (header_spans, body_spans) = match first_empty_line_idx {
+        Some(idx) => {
+            let header_spans = line_spans.clone()[1..idx].to_vec();
+            let body_spans = Some(line_spans.clone()[idx..].to_vec());
+
+            (header_spans, body_spans)
+        }
+        None => {
+            let header_spans = line_spans.clone()[1..].to_vec();
+            let body_spans = None;
+
+            (header_spans, body_spans)
+        }
+    };
+    (header_spans, body_spans)
+}
+
+fn get_span_extent_from_spans(body_spans: Option<Vec<Range<usize>>>) -> Option<Range<usize>> {
+    let body_span = body_spans.and_then(|spans| {
+        if spans.is_empty() {
+            return None;
+        }
+
+        let first = spans.first().unwrap();
+        let last = spans.last().unwrap();
+
+        Some(first.start + 1..last.end)
+    });
+    body_span
 }
