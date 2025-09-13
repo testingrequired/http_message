@@ -2,8 +2,6 @@ use std::ops::Range;
 
 pub type Span = Range<usize>;
 
-pub type LineSpans = Vec<Option<Span>>;
-
 /// Get all line spans in the given string
 pub fn get_line_spans(input: &str) -> Vec<Range<usize>> {
     let mut spans = Vec::new();
@@ -24,7 +22,7 @@ pub fn get_line_spans(input: &str) -> Vec<Range<usize>> {
 }
 
 #[cfg(test)]
-mod tests {
+mod get_line_spans_tests {
     use super::*;
 
     #[test]
