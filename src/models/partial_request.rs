@@ -1,6 +1,6 @@
 use std::{ops::Range, str::FromStr};
 
-use crate::parse;
+use crate::{error::Error, parse};
 
 /// A partial HTTP request that might not conform to HTTP spec
 ///
@@ -98,10 +98,10 @@ impl PartialHttpRequest {
 }
 
 impl FromStr for PartialHttpRequest {
-    type Err = String;
+    type Err = Error;
 
     /// Parse a string in to a partial request
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(parse::parse_request(s))
+        parse::parse_request(s)
     }
 }
