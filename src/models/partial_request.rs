@@ -97,6 +97,12 @@ impl PartialHttpRequest {
     }
 }
 
+impl Default for PartialHttpRequest {
+    fn default() -> Self {
+        Self::from_str("GET https://example.com HTTP/1.1").unwrap()
+    }
+}
+
 impl FromStr for PartialHttpRequest {
     type Err = Error;
 
@@ -207,4 +213,42 @@ fn get_span_extent_from_spans(body_spans: Option<Vec<Range<usize>>>) -> Option<R
         Some(first.start + 1..last.end)
     });
     body_span
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        PartialHttpRequest,
+        models::{request::HttpRequest, uri::Uri},
+    };
+
+    #[test]
+    fn implements_default() {
+        let partial = PartialHttpRequest::default();
+
+        assert_eq!(
+            PartialHttpRequest::new(
+                "GET https://example.com HTTP/1.1",
+                Some(4..23),
+                Some(0..3),
+                Some(24..32),
+                vec![],
+                None
+            ),
+            partial
+        );
+
+        let request: HttpRequest = partial.into();
+
+        assert_eq!(
+            HttpRequest {
+                uri: Uri::new("https://example.com"),
+                method: "GET".into(),
+                http_version: "HTTP/1.1".into(),
+                headers: vec![],
+                body: None
+            },
+            request
+        );
+    }
 }
