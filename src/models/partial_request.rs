@@ -112,11 +112,20 @@ impl FromStr for PartialHttpRequest {
 
     /// Parse a string in to a partial request
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        parse_request(s)
+        parse_request(s, parse_first_line)
     }
 }
 
-fn parse_request(input: &str) -> Result<PartialHttpRequest, Error> {
+type FirstLineParts = (
+    Option<Range<usize>>,
+    Option<Range<usize>>,
+    Option<Range<usize>>,
+);
+
+fn parse_request<F>(input: &str, parse_first_line: F) -> Result<PartialHttpRequest, Error>
+where
+    F: Fn(&str) -> FirstLineParts,
+{
     if input.trim().is_empty() {
         return Ok(PartialHttpRequest::new(
             input,
@@ -154,13 +163,7 @@ fn parse_request(input: &str) -> Result<PartialHttpRequest, Error> {
 }
 
 /// Parse the first line of an HTTP request message
-fn parse_first_line(
-    first_line: &str,
-) -> (
-    Option<Range<usize>>,
-    Option<Range<usize>>,
-    Option<Range<usize>>,
-) {
+fn parse_first_line(first_line: &str) -> FirstLineParts {
     let mut parts = vec![];
     let mut last_end = 0;
 
