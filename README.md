@@ -18,6 +18,7 @@ fn main() {
     assert_eq!(None, partial.http_version_str());
 
     assert_eq!(Some(24..34), partial.header_span("x-key"));
+    assert_eq!(Some("x-key: 123"), partial.header_str("x-key"));
 }
 ```
 
