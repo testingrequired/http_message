@@ -1,7 +1,10 @@
 use core::fmt;
 use std::{ops::Range, str::FromStr};
 
-use crate::{error::Error, span::get_line_spans};
+use crate::{
+    error::Error,
+    span::{Span, get_line_spans},
+};
 
 /// A partial HTTP request that might not conform to HTTP spec
 ///
@@ -45,66 +48,59 @@ impl PartialHttpRequest {
         &self.message
     }
 
-    pub fn uri_span(&self) -> Option<Range<usize>> {
-        self.uri.clone()
+    fn slice_message(&self, span: &Span) -> &str {
+        &self.message[span.clone()]
+    }
+
+    pub fn uri_span(&self) -> &Option<Range<usize>> {
+        &self.uri
     }
 
     pub fn uri_str(&self) -> Option<&str> {
-        self.uri
-            .as_ref()
-            .map(|span| &self.message[span.start..span.end])
+        self.uri.as_ref().map(|span| self.slice_message(span))
     }
 
-    pub fn method_span(&self) -> Option<Range<usize>> {
-        self.method.clone()
+    pub fn method_span(&self) -> &Option<Range<usize>> {
+        &self.method
     }
 
     pub fn method_str(&self) -> Option<&str> {
-        self.method
-            .as_ref()
-            .map(|span| &self.message[span.start..span.end])
+        self.method.as_ref().map(|span| self.slice_message(span))
     }
 
-    pub fn http_version_span(&self) -> Option<Range<usize>> {
-        self.http_version.clone()
+    pub fn http_version_span(&self) -> &Option<Range<usize>> {
+        &self.http_version
     }
 
     pub fn http_version_str(&self) -> Option<&str> {
         self.http_version
             .as_ref()
-            .map(|span| &self.message[span.start..span.end])
+            .map(|span| self.slice_message(span))
     }
 
-    pub fn header_spans(&self) -> Vec<Range<usize>> {
-        self.headers.clone()
+    pub fn header_spans(&self) -> &Vec<Range<usize>> {
+        &self.headers
     }
 
     pub fn header_strs(&self) -> Vec<&str> {
         self.headers
             .iter()
-            .map(|span| &self.message[span.start..span.end])
+            .map(|span| self.slice_message(span))
             .collect()
     }
 
-    pub fn header_span(&self, key: &str) -> Option<Range<usize>> {
+    pub fn header_span(&self, key: &str) -> Option<&Range<usize>> {
         self.headers
-            .clone()
-            .into_iter()
-            .find(|span| self.message[span.start..span.end].starts_with(&format!("{key}:")))
+            .iter()
+            .find(|span| self.slice_message(span).starts_with(&format!("{key}:")))
     }
 
     pub fn header_str(&self, key: &str) -> Option<&str> {
-        self.headers
-            .clone()
-            .into_iter()
-            .find(|span| self.message[span.start..span.end].starts_with(&format!("{key}:")))
-            .map(|span| &self.message[span.start..span.end])
+        self.header_span(key).map(|span| self.slice_message(span))
     }
 
     pub fn body_str(&self) -> Option<&str> {
-        self.body
-            .as_ref()
-            .map(|body| &self.message[body.start..body.end])
+        self.body.as_ref().map(|span| &self.message[span.clone()])
     }
 }
 
