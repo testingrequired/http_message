@@ -12,8 +12,8 @@ use crate::{
 #[derive(Debug, Clone, PartialEq)]
 pub struct PartialHttpRequest {
     message: String,
-    uri: Option<Range<usize>>,
     method: Option<Range<usize>>,
+    uri: Option<Range<usize>>,
     http_version: Option<Range<usize>>,
     headers: Vec<Range<usize>>,
     body: Option<Range<usize>>,
@@ -36,52 +36,57 @@ impl PartialHttpRequest {
     ) -> Self {
         Self {
             message: message.to_string(),
-            uri,
             method,
+            uri,
             http_version,
             headers,
             body,
         }
     }
 
+    /// Get the original HTTP request message text
     pub fn message(&self) -> &str {
         &self.message
     }
 
-    fn slice_message(&self, span: &Span) -> &str {
-        &self.message[span.clone()]
-    }
-
+    /// Get the text span of the uri, if defined
     pub fn uri_span(&self) -> &Option<Range<usize>> {
         &self.uri
     }
 
+    /// Get the string text of the uri, if defined
     pub fn uri_str(&self) -> Option<&str> {
         self.uri.as_ref().map(|span| self.slice_message(span))
     }
 
+    /// Get the text span of the method, if defined
     pub fn method_span(&self) -> &Option<Range<usize>> {
         &self.method
     }
 
+    /// Get the string text of the method, if defined
     pub fn method_str(&self) -> Option<&str> {
         self.method.as_ref().map(|span| self.slice_message(span))
     }
 
+    /// Get the text span of the http version, if defined
     pub fn http_version_span(&self) -> &Option<Range<usize>> {
         &self.http_version
     }
 
+    /// Get the string text of the http version, if defined
     pub fn http_version_str(&self) -> Option<&str> {
         self.http_version
             .as_ref()
             .map(|span| self.slice_message(span))
     }
 
+    /// Get a list of the header line text spans
     pub fn header_spans(&self) -> &Vec<Range<usize>> {
         &self.headers
     }
 
+    /// Get a list of the string text header lines
     pub fn header_strs(&self) -> Vec<&str> {
         self.headers
             .iter()
@@ -89,18 +94,26 @@ impl PartialHttpRequest {
             .collect()
     }
 
+    /// Get the text span of a header line by key, if defined
     pub fn header_span(&self, key: &str) -> Option<&Range<usize>> {
         self.headers
             .iter()
             .find(|span| self.slice_message(span).starts_with(&format!("{key}:")))
     }
 
+    /// Get the string text of a header by key, if defined
     pub fn header_str(&self, key: &str) -> Option<&str> {
         self.header_span(key).map(|span| self.slice_message(span))
     }
 
+    /// Get the string text of the body, if defined
     pub fn body_str(&self) -> Option<&str> {
         self.body.as_ref().map(|span| &self.message[span.clone()])
+    }
+
+    /// Return a slice of the message string
+    fn slice_message(&self, span: &Span) -> &str {
+        &self.message[span.clone()]
     }
 }
 
