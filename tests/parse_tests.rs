@@ -13,7 +13,7 @@ fn parse_empty_request() {
     let partial = PartialHttpRequest::from_str(&content).expect("should be parsable");
 
     assert_eq!(
-        PartialHttpRequest::new(&content, None, None, None, vec![], None),
+        PartialHttpRequest::parsed(&content, None, None, None, vec![], None),
         partial
     );
 }
@@ -26,7 +26,7 @@ fn parse_whitespace_request() {
     let partial = PartialHttpRequest::from_str(&content).expect("should be parsable");
 
     assert_eq!(
-        PartialHttpRequest::new(&content, None, None, None, vec![], None),
+        PartialHttpRequest::parsed(&content, None, None, None, vec![], None),
         partial
     );
 }
@@ -39,7 +39,7 @@ fn parse_get_request() {
     let partial = PartialHttpRequest::from_str(&content).expect("should be parsable");
 
     assert_eq!(
-        PartialHttpRequest::new(
+        PartialHttpRequest::parsed(
             include_str!("../tests/fixtures/get.request"),
             Some(0..3),
             Some(4..23),
@@ -72,7 +72,7 @@ fn parse_get_without_http_version_request() {
     let partial = PartialHttpRequest::from_str(&content).expect("should be parsable");
 
     assert_eq!(
-        PartialHttpRequest::new(
+        PartialHttpRequest::parsed(
             include_str!("../tests/fixtures/get_without_http_version.request"),
             Some(0..3),
             Some(4..23),
@@ -105,7 +105,7 @@ fn parse_get_with_headers_request() {
     let partial = PartialHttpRequest::from_str(&content).expect("should be parsable");
 
     assert_eq!(
-        PartialHttpRequest::new(
+        PartialHttpRequest::parsed(
             include_str!("../tests/fixtures/get_with_headers.request"),
             Some(0..3),
             Some(4..23),
@@ -144,7 +144,7 @@ fn parse_post_with_headers_and_body_request() {
     let body = Some(53..64);
 
     assert_eq!(
-        PartialHttpRequest::new(&content, method, uri, http_version, headers, body),
+        PartialHttpRequest::parsed(&content, method, uri, http_version, headers, body),
         partial
     );
 
@@ -170,7 +170,7 @@ fn parse_post_with_body_request() {
     let partial = PartialHttpRequest::from_str(&content).expect("should be parsable");
 
     assert_eq!(
-        PartialHttpRequest::new(
+        PartialHttpRequest::parsed(
             include_str!("../tests/fixtures/post_with_body.request"),
             Some(0..4),
             Some(5..24),
@@ -203,7 +203,7 @@ fn parse_get_with_multiple_spaces_request() {
     let partial = PartialHttpRequest::from_str(&content).expect("should be parsable");
 
     assert_eq!(
-        PartialHttpRequest::new(
+        PartialHttpRequest::parsed(
             &content,
             Some(0..3),
             Some(5..24),

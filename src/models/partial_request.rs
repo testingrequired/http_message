@@ -26,7 +26,7 @@ impl fmt::Display for PartialHttpRequest {
 }
 
 impl PartialHttpRequest {
-    pub fn new(
+    pub fn parsed(
         message: &str,
         method: Option<Range<usize>>,
         uri: Option<Range<usize>>,
@@ -195,7 +195,7 @@ where
     F: Fn(&str) -> FirstLineParts,
 {
     if input.trim().is_empty() {
-        return Ok(PartialHttpRequest::new(
+        return Ok(PartialHttpRequest::parsed(
             input,
             None,
             None,
@@ -220,7 +220,7 @@ where
 
     let body_span = get_span_extent_from_spans(body_spans);
 
-    Ok(PartialHttpRequest::new(
+    Ok(PartialHttpRequest::parsed(
         input,
         method,
         uri,
@@ -300,31 +300,31 @@ mod tests {
     #[test]
     #[should_panic]
     fn verifies_out_of_bounds_method_span() {
-        PartialHttpRequest::new("", Some(1..2), None, None, vec![], None);
+        PartialHttpRequest::parsed("", Some(1..2), None, None, vec![], None);
     }
 
     #[test]
     #[should_panic]
     fn verifies_inverted_method_span() {
-        PartialHttpRequest::new("", Some(2..1), None, None, vec![], None);
+        PartialHttpRequest::parsed("", Some(2..1), None, None, vec![], None);
     }
 
     #[test]
     #[should_panic]
     fn verifies_out_of_bounds_uri_span() {
-        PartialHttpRequest::new("", None, Some(1..2), None, vec![], None);
+        PartialHttpRequest::parsed("", None, Some(1..2), None, vec![], None);
     }
 
     #[test]
     #[should_panic]
     fn verifies_inverted_uri_span() {
-        PartialHttpRequest::new("", None, Some(2..1), None, vec![], None);
+        PartialHttpRequest::parsed("", None, Some(2..1), None, vec![], None);
     }
 
     #[test]
     #[should_panic]
     fn verifies_method_span_overlaps_uri_span() {
-        PartialHttpRequest::new(
+        PartialHttpRequest::parsed(
             "GET https://example.com",
             Some(0..3),
             Some(2..10),
@@ -337,37 +337,37 @@ mod tests {
     #[test]
     #[should_panic]
     fn verifies_out_of_bounds_http_version_span() {
-        PartialHttpRequest::new("", None, None, Some(1..2), vec![], None);
+        PartialHttpRequest::parsed("", None, None, Some(1..2), vec![], None);
     }
 
     #[test]
     #[should_panic]
     fn verifies_inverted_http_version_span() {
-        PartialHttpRequest::new("", None, None, Some(2..1), vec![], None);
+        PartialHttpRequest::parsed("", None, None, Some(2..1), vec![], None);
     }
 
     #[test]
     #[should_panic]
     fn verifies_out_of_bounds_header_span() {
-        PartialHttpRequest::new("", None, None, None, vec![1..2], None);
+        PartialHttpRequest::parsed("", None, None, None, vec![1..2], None);
     }
 
     #[test]
     #[should_panic]
     fn verifies_inverted_header_span() {
-        PartialHttpRequest::new("", None, None, None, vec![2..1], None);
+        PartialHttpRequest::parsed("", None, None, None, vec![2..1], None);
     }
 
     #[test]
     #[should_panic]
     fn verifies_out_of_bounds_body_span() {
-        PartialHttpRequest::new("", None, None, None, vec![], Some(1..2));
+        PartialHttpRequest::parsed("", None, None, None, vec![], Some(1..2));
     }
 
     #[test]
     #[should_panic]
     fn verifies_inverted_body_span() {
-        PartialHttpRequest::new("", None, None, None, vec![], Some(2..1));
+        PartialHttpRequest::parsed("", None, None, None, vec![], Some(2..1));
     }
 
     #[test]
@@ -375,7 +375,7 @@ mod tests {
         let partial = PartialHttpRequest::default();
 
         assert_eq!(
-            PartialHttpRequest::new(
+            PartialHttpRequest::parsed(
                 "GET https://example.com HTTP/1.1",
                 Some(0..3),
                 Some(4..23),

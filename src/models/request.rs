@@ -124,7 +124,7 @@ mod from_partial_request_tests {
 
     #[test]
     fn from_partial_request_get() {
-        let partial_request = PartialHttpRequest::new(
+        let partial_request = PartialHttpRequest::parsed(
             r#"
         GET https://example.com HTTP/1.1
         x-api-key: abc123
