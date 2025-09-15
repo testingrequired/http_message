@@ -34,14 +34,61 @@ impl PartialHttpRequest {
         headers: Vec<Range<usize>>,
         body: Option<Range<usize>>,
     ) -> Self {
-        Self {
+        let partial = Self {
             message: message.to_string(),
             method,
             uri,
             http_version,
             headers,
             body,
+        };
+
+        partial.verify_spans();
+
+        partial
+    }
+
+    /// Verify all the spans in the struct are valid
+    ///
+    /// - Aren't out of bounds of the message
+    /// - Parts aren't overlapping or out of order
+    fn verify_spans(&self) {
+        self.method.as_ref().inspect(|span| {
+            assert!(span.start < span.end);
+            assert_text_span(self.message(), span);
+        });
+
+        self.uri.as_ref().inspect(|span| {
+            assert!(span.start < span.end);
+            assert_text_span(self.message(), span);
+
+            if let Some(method) = self.method_span() {
+                if !(method.start < span.start && method.end < span.start) {
+                    panic!("uri {span:?} and method {method:?} spans conflict");
+                }
+            }
+        });
+
+        self.http_version.as_ref().inspect(|span| {
+            assert!(span.start < span.end);
+            assert_text_span(self.message(), span);
+
+            if let Some(uri) = self.uri_span() {
+                if !(uri.start < span.start && uri.end < span.start) {
+                    panic!("http version {span:?} and uri {uri:?} spans conflict");
+                }
+            }
+        });
+
+        for span in self.header_spans().iter() {
+            assert!(span.start < span.end);
+            assert_text_span(self.message(), span);
         }
+
+        self.body.as_ref().inspect(|span| {
+            assert!(span.start < span.end);
+            assert_text_span(self.message(), span);
+        });
     }
 
     /// Get the original HTTP request message text
@@ -115,6 +162,11 @@ impl PartialHttpRequest {
     fn slice_message(&self, span: &Span) -> &str {
         &self.message[span.clone()]
     }
+}
+
+fn assert_text_span(text: &str, span: &Range<usize>) {
+    text.get(span.clone())
+        .expect(&format!("span {:?} is outside of text bounds", span));
 }
 
 impl Default for PartialHttpRequest {
@@ -244,6 +296,79 @@ mod tests {
         PartialHttpRequest,
         models::{request::HttpRequest, uri::Uri},
     };
+
+    #[test]
+    #[should_panic]
+    fn verifies_out_of_bounds_method_span() {
+        PartialHttpRequest::new("", Some(1..2), None, None, vec![], None);
+    }
+
+    #[test]
+    #[should_panic]
+    fn verifies_inverted_method_span() {
+        PartialHttpRequest::new("", Some(2..1), None, None, vec![], None);
+    }
+
+    #[test]
+    #[should_panic]
+    fn verifies_out_of_bounds_uri_span() {
+        PartialHttpRequest::new("", None, Some(1..2), None, vec![], None);
+    }
+
+    #[test]
+    #[should_panic]
+    fn verifies_inverted_uri_span() {
+        PartialHttpRequest::new("", None, Some(2..1), None, vec![], None);
+    }
+
+    #[test]
+    #[should_panic]
+    fn verifies_method_span_overlaps_uri_span() {
+        PartialHttpRequest::new(
+            "GET https://example.com",
+            Some(0..3),
+            Some(2..10),
+            None,
+            vec![],
+            None,
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn verifies_out_of_bounds_http_version_span() {
+        PartialHttpRequest::new("", None, None, Some(1..2), vec![], None);
+    }
+
+    #[test]
+    #[should_panic]
+    fn verifies_inverted_http_version_span() {
+        PartialHttpRequest::new("", None, None, Some(2..1), vec![], None);
+    }
+
+    #[test]
+    #[should_panic]
+    fn verifies_out_of_bounds_header_span() {
+        PartialHttpRequest::new("", None, None, None, vec![1..2], None);
+    }
+
+    #[test]
+    #[should_panic]
+    fn verifies_inverted_header_span() {
+        PartialHttpRequest::new("", None, None, None, vec![2..1], None);
+    }
+
+    #[test]
+    #[should_panic]
+    fn verifies_out_of_bounds_body_span() {
+        PartialHttpRequest::new("", None, None, None, vec![], Some(1..2));
+    }
+
+    #[test]
+    #[should_panic]
+    fn verifies_inverted_body_span() {
+        PartialHttpRequest::new("", None, None, None, vec![], Some(2..1));
+    }
 
     #[test]
     fn implements_default() {
