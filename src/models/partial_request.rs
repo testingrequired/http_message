@@ -1,5 +1,5 @@
 use core::fmt;
-use std::{ops::Range, str::FromStr};
+use std::ops::Range;
 
 use crate::{
     error::Error,
@@ -26,6 +26,10 @@ impl fmt::Display for PartialHttpRequest {
 }
 
 impl PartialHttpRequest {
+    pub fn from_str(message: &str) -> Result<Self, Error> {
+        parse_request(message, parse_first_line)
+    }
+
     pub fn parsed(
         message: &str,
         method: Option<Range<usize>>,
@@ -172,15 +176,6 @@ fn assert_text_span(text: &str, span: &Range<usize>) {
 impl Default for PartialHttpRequest {
     fn default() -> Self {
         Self::from_str("GET https://example.com HTTP/1.1").unwrap()
-    }
-}
-
-impl FromStr for PartialHttpRequest {
-    type Err = Error;
-
-    /// Parse a string in to a partial request
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        parse_request(s, parse_first_line)
     }
 }
 

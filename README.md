@@ -1,8 +1,6 @@
 # http_message
 
 ```rust
-use std::str::FromStr;
-
 use http_message::PartialHttpRequest;
 
 fn main() {
@@ -19,6 +17,19 @@ fn main() {
 
     assert_eq!(Some(&(24..34)), partial.header_span("x-key"));
     assert_eq!(Some("x-key: 123"), partial.header_str("x-key"));
+
+    let request: HttpRequest = partial.into();
+
+    assert_eq!(
+        HttpRequest {
+            uri: Uri::new("https://example.com"),
+            method: "GET".into(),
+            http_version: "HTTP/1.1".into(),
+            headers: vec![("x-key", "123").into()],
+            body: None
+        },
+        request
+    );
 }
 ```
 

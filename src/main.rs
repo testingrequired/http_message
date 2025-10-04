@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 fn main() {
     use std::env;
     use std::fs;

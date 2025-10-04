@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use http_message::PartialHttpRequest;
 use http_message::models::{request::HttpRequest, uri::Uri};
 
