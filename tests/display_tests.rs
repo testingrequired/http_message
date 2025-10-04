@@ -1,6 +1,6 @@
 use std::fs;
 
-use http_message::models::PartialHttpRequest;
+use http_message::parse_partial_request;
 
 use pretty_assertions::assert_eq;
 
@@ -39,7 +39,7 @@ macro_rules! test {
             let path: &str = $path;
             let content = fs::read_to_string(path).expect("should read test fixture");
 
-            let partial = PartialHttpRequest::from_str(&content).expect("should be parsable");
+            let partial = parse_partial_request(&content).expect("should be parsable");
 
             assert_eq!(content, format!("{partial}"));
         }

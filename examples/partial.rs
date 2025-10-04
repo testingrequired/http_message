@@ -1,10 +1,12 @@
 use http_message::{
     error::Error,
     models::{HttpRequest, PartialHttpRequest},
+    parse_partial_request,
 };
 
 fn main() {
-    let partial = PartialHttpRequest::from_str("GET https://example.com\nx-key: 123").unwrap();
+    let partial: PartialHttpRequest<'_> =
+        parse_partial_request("GET https://example.com\nx-key: 123").unwrap();
 
     assert_eq!(&Some(0..3), partial.method_span());
     assert_eq!(Some("GET"), partial.method_str());

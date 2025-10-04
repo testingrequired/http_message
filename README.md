@@ -10,10 +10,12 @@ A `PartialHttpRequest` contains the potential spans for `method`, `uri`, `http_v
 use http_message::{
     error::Error,
     models::{HttpRequest, PartialHttpRequest},
+    parse_partial_request,
 };
 
 fn main() {
-    let partial = PartialHttpRequest::from_str("GET https://example.com\nx-key: 123").unwrap();
+    let partial: PartialHttpRequest<'_> =
+        parse_partial_request("GET https://example.com\nx-key: 123").unwrap();
 
     assert_eq!(&Some(0..3), partial.method_span());
     assert_eq!(Some("GET"), partial.method_str());
@@ -39,11 +41,14 @@ fn main() {
 A `ParsedHttpRequest` contains the spans for `method`, `uri`, `http_version`, `headers`, and `body`. The HTTP message does need to be spec compliant so things like `http_version` are required.
 
 ```rust
-use http_message::models::{HttpRequest, ParsedHttpRequest, Uri};
+use http_message::{
+    models::{HttpRequest, ParsedHttpRequest, Uri},
+    parse_request,
+};
 
 fn main() {
-    let parsed =
-        ParsedHttpRequest::from_str("GET https://example.com HTTP/1.1\nx-key: 123\n\n").unwrap();
+    let parsed: ParsedHttpRequest<'_> =
+        parse_request("GET https://example.com HTTP/1.1\nx-key: 123\n\n").unwrap();
 
     assert_eq!(&(0..3), parsed.method_span());
     assert_eq!("GET", parsed.method_str());

@@ -1,8 +1,11 @@
-use http_message::models::{HttpRequest, ParsedHttpRequest, Uri};
+use http_message::{
+    models::{HttpRequest, ParsedHttpRequest, Uri},
+    parse_request,
+};
 
 fn main() {
-    let parsed =
-        ParsedHttpRequest::from_str("GET https://example.com HTTP/1.1\nx-key: 123\n\n").unwrap();
+    let parsed: ParsedHttpRequest<'_> =
+        parse_request("GET https://example.com HTTP/1.1\nx-key: 123\n\n").unwrap();
 
     assert_eq!(&(0..3), parsed.method_span());
     assert_eq!("GET", parsed.method_str());
