@@ -7,7 +7,14 @@ pub struct Uri(Url);
 
 impl Uri {
     pub fn new(uri: &str) -> Self {
-        Self(Url::parse(uri).expect("should be a valid url"))
+        let uri = if uri.starts_with("https://") || uri.starts_with("http://") {
+            uri
+        } else {
+            &format!("https://{uri}")
+        };
+
+        let message = format!("should be a valid url: {uri}");
+        Self(Url::parse(uri).unwrap_or_else(|_| panic!("{}", message)))
     }
 }
 
