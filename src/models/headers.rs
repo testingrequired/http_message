@@ -64,7 +64,7 @@ mod tests {
     #[test]
     fn test_http_header_display() {
         let header = HttpHeader::new("Content-Type", "application/json");
-        assert_eq!(format!("{}", header), "Content-Type: application/json");
+        assert_eq!(format!("{header}"), "Content-Type: application/json");
     }
 
     #[test]

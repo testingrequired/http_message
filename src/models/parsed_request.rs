@@ -26,7 +26,7 @@ impl<'http_message> fmt::Display for ParsedHttpRequest<'http_message> {
 }
 
 impl<'http_message> ParsedHttpRequest<'http_message> {
-    pub fn from_str(message: &'http_message str) -> Result<Self, Error> {
+    pub fn parse(message: &'http_message str) -> Result<Self, Error> {
         parse_request(message, parse_first_line)
     }
 
@@ -105,7 +105,7 @@ impl<'http_message> ParsedHttpRequest<'http_message> {
 
     /// Get the original HTTP request message text
     pub fn message(&self) -> &str {
-        &self.message
+        self.message
     }
 
     /// Get the text span of the uri, if defined
@@ -176,12 +176,12 @@ impl<'http_message> ParsedHttpRequest<'http_message> {
 
 fn assert_text_span(text: &str, span: &Range<usize>) {
     text.get(span.clone())
-        .expect(&format!("span {:?} is outside of text bounds", span));
+        .unwrap_or_else(|| panic!("span {span:?} is outside of text bounds"));
 }
 
 impl<'http_message> Default for ParsedHttpRequest<'http_message> {
     fn default() -> Self {
-        Self::from_str("GET https://example.com HTTP/1.1\n\n").unwrap()
+        Self::parse("GET https://example.com HTTP/1.1\n\n").unwrap()
     }
 }
 
@@ -249,7 +249,7 @@ fn parse_first_line(first_line: &str) -> FirstLineParts {
         parts.push(last_end..first_line.len());
     }
 
-    let method_span = parts.get(0).cloned();
+    let method_span = parts.first().cloned();
     let uri_span = parts.get(1).cloned();
     let http_version_span = parts.get(2).cloned();
 

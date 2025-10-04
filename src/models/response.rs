@@ -13,9 +13,9 @@ pub struct HttpResponse {
 }
 
 impl HttpResponse {
-    pub fn new(status_cdoe: HttpStatusCode, headers: Vec<HttpHeader>, body: Option<&str>) -> Self {
+    pub fn new(status_code: HttpStatusCode, headers: Vec<HttpHeader>, body: Option<&str>) -> Self {
         Self {
-            status_code: status_cdoe.into(),
+            status_code,
             headers,
             body: body.map(|b| b.to_string()),
         }
@@ -87,7 +87,7 @@ mod tests {
     #[test]
     fn test_http_status_code_display() {
         let status_code = HttpStatusCode::new(200);
-        assert_eq!(format!("{}", status_code), "200");
+        assert_eq!(format!("{status_code}"), "200");
     }
 
     #[test]

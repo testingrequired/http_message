@@ -13,7 +13,7 @@ fn main() {
 
     match fs::read_to_string(&args[1]) {
         Ok(contents) => {
-            let partial = PartialHttpRequest::from_str(&contents);
+            let partial = PartialHttpRequest::parse(&contents);
 
             println!("{partial:#?}");
         }
