@@ -1,6 +1,6 @@
 use std::fs;
 
-use http_message::PartialHttpRequest;
+use http_message::models::PartialHttpRequest;
 
 use pretty_assertions::assert_eq;
 

@@ -1,3 +1,5 @@
+use http_message::models::PartialHttpRequest;
+
 fn main() {
     use std::env;
     use std::fs;
@@ -11,7 +13,7 @@ fn main() {
 
     match fs::read_to_string(&args[1]) {
         Ok(contents) => {
-            let partial = http_message::PartialHttpRequest::from_str(&contents);
+            let partial = PartialHttpRequest::from_str(&contents);
 
             println!("{partial:#?}");
         }

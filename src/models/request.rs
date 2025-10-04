@@ -1,12 +1,8 @@
 use crate::{
     error::Error,
     models::{
-        body::{HttpBody, PossibleHttpBody},
-        headers::HttpHeader,
-        parsed_request::ParsedHttpRequest,
-        partial_request::PartialHttpRequest,
-        uri::Uri,
-        version::HttpVersion,
+        HttpBody, HttpHeader, HttpVersion, ParsedHttpRequest, PartialHttpRequest, PossibleHttpBody,
+        Uri,
     },
 };
 

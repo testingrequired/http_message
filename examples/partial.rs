@@ -1,4 +1,7 @@
-use http_message::{PartialHttpRequest, error::Error, models::request::HttpRequest};
+use http_message::{
+    error::Error,
+    models::{HttpRequest, PartialHttpRequest},
+};
 
 fn main() {
     let partial = PartialHttpRequest::from_str("GET https://example.com\nx-key: 123").unwrap();

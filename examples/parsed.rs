@@ -1,4 +1,4 @@
-use http_message::models::{parsed_request::ParsedHttpRequest, request::HttpRequest, uri::Uri};
+use http_message::models::{HttpRequest, ParsedHttpRequest, Uri};
 
 fn main() {
     let parsed =

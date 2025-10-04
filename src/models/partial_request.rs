@@ -291,9 +291,8 @@ fn get_span_extent_from_spans(body_spans: Option<Vec<Range<usize>>>) -> Option<R
 #[cfg(test)]
 mod tests {
     use crate::{
-        PartialHttpRequest,
         error::Error,
-        models::{request::HttpRequest, uri::Uri},
+        models::{HttpRequest, PartialHttpRequest, Uri},
     };
 
     #[test]

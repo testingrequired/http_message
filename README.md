@@ -4,10 +4,13 @@ Parse partial/non spec compliant HTTP messages.
 
 ## Partial HTTP Message
 
-A partial HTTP message contains the potential spans for `method`, `uri`, `http_version`, `headers`, and `body`. The HTTP message does not need to be spec compliant so things like `http_version` are optional.
+A `PartialHttpRequest` contains the potential spans for `method`, `uri`, `http_version`, `headers`, and `body`. The HTTP message does not need to be spec compliant so things like `http_version` are optional.
 
 ```rust
-use http_message::{PartialHttpRequest, error::Error, models::request::HttpRequest};
+use http_message::{
+    error::Error,
+    models::{HttpRequest, PartialHttpRequest},
+};
 
 fn main() {
     let partial = PartialHttpRequest::from_str("GET https://example.com\nx-key: 123").unwrap();
@@ -28,14 +31,15 @@ fn main() {
 
     assert_eq!(Err(Error::missing_required("http_version")), request);
 }
+
 ```
 
 ## Parsed HTTP Message
 
-A parsed HTTP message contains the spans for `method`, `uri`, `http_version`, `headers`, and `body`. The HTTP message does need to be spec compliant so things like `http_version` are required.
+A `ParsedHttpRequest` contains the spans for `method`, `uri`, `http_version`, `headers`, and `body`. The HTTP message does need to be spec compliant so things like `http_version` are required.
 
 ```rust
-use http_message::models::{parsed_request::ParsedHttpRequest, request::HttpRequest, uri::Uri};
+use http_message::models::{HttpRequest, ParsedHttpRequest, Uri};
 
 fn main() {
     let parsed =

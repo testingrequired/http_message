@@ -1,6 +1,6 @@
-use http_message::PartialHttpRequest;
 use http_message::error::Error;
-use http_message::models::{request::HttpRequest, uri::Uri};
+use http_message::models::PartialHttpRequest;
+use http_message::models::{HttpRequest, Uri};
 
 use pretty_assertions::assert_eq;
 
