@@ -289,7 +289,7 @@ fn get_span_extent_from_spans(body_spans: Option<Vec<Range<usize>>>) -> Option<R
 
 #[cfg(test)]
 mod tests {
-    use crate::models::{parsed_request::ParsedHttpRequest, request::HttpRequest, uri::Uri};
+    use crate::models::{HttpRequest, ParsedHttpRequest};
 
     #[test]
     #[should_panic]
@@ -379,7 +379,7 @@ mod tests {
 
         assert_eq!(
             HttpRequest {
-                uri: Uri::new("https://example.com"),
+                uri: "https://example.com".into(),
                 method: "GET".into(),
                 http_version: "HTTP/1.1".into(),
                 headers: vec![],

@@ -1,6 +1,6 @@
 use http_message::error::Error;
+use http_message::models::HttpRequest;
 use http_message::models::PartialHttpRequest;
-use http_message::models::{HttpRequest, Uri};
 
 use http_message::parse_partial_request;
 use pretty_assertions::assert_eq;
@@ -44,7 +44,7 @@ fn parse_get_request() {
 
     assert_eq!(
         Ok(HttpRequest {
-            uri: Uri::new("https://example.com"),
+            uri: "example.com".into(),
             method: "GET".into(),
             http_version: "HTTP/1.1".into(),
             headers: vec![],
@@ -99,7 +99,7 @@ fn parse_get_with_headers_request() {
 
     assert_eq!(
         Ok(HttpRequest {
-            uri: Uri::new("https://example.com"),
+            uri: "example.com".into(),
             method: "GET".into(),
             http_version: "HTTP/1.1".into(),
             headers: vec!["x-api-key: abc123".into()],
@@ -130,7 +130,7 @@ fn parse_post_with_headers_and_body_request() {
 
     assert_eq!(
         Ok(HttpRequest {
-            uri: Uri::new("https://example.com"),
+            uri: "example.com".into(),
             method: "POST".into(),
             http_version: "HTTP/1.1".into(),
             headers: vec!["x-api-key: abc123".into()],
@@ -162,7 +162,7 @@ fn parse_post_with_body_request() {
 
     assert_eq!(
         Ok(HttpRequest {
-            uri: Uri::new("https://example.com"),
+            uri: "example.com".into(),
             method: "POST".into(),
             http_version: "HTTP/1.1".into(),
             headers: vec![],
@@ -194,7 +194,7 @@ fn parse_get_with_multiple_spaces_request() {
 
     assert_eq!(
         Ok(HttpRequest {
-            uri: Uri::new("https://example.com"),
+            uri: "example.com".into(),
             method: "GET".into(),
             http_version: "HTTP/1.1".into(),
             headers: vec![],

@@ -45,7 +45,7 @@ pub struct HttpRequest {
 impl HttpRequest {
     pub fn get(uri: &str, headers: Vec<HttpHeader>) -> Self {
         Self {
-            uri: Uri::new(uri),
+            uri: uri.into(),
             method: HttpMethod::GET,
             http_version: Default::default(),
             headers,
@@ -55,7 +55,7 @@ impl HttpRequest {
 
     pub fn post(uri: &str, headers: Vec<HttpHeader>, body: PossibleHttpBody) -> Self {
         Self {
-            uri: Uri::new(uri),
+            uri: uri.into(),
             method: HttpMethod::POST,
             headers,
             body,
@@ -111,7 +111,7 @@ impl<'a> TryFrom<PartialHttpRequest<'a>> for HttpRequest {
             .ok_or(Error::missing_required("http_version"))?;
 
         Ok(Self {
-            uri: Uri::new(uri),
+            uri: uri.into(),
             method: method.into(),
             headers: value
                 .header_strs()
@@ -127,7 +127,7 @@ impl<'a> TryFrom<PartialHttpRequest<'a>> for HttpRequest {
 impl<'a> From<ParsedHttpRequest<'a>> for HttpRequest {
     fn from(value: ParsedHttpRequest) -> Self {
         Self {
-            uri: Uri::new(&value.uri_str()),
+            uri: value.uri_str().into(),
             method: value.method_str().into(),
             headers: value
                 .header_strs()
@@ -144,7 +144,7 @@ impl<'a> From<ParsedHttpRequest<'a>> for HttpRequest {
 mod from_partial_request_tests {
     use crate::{
         error::Error,
-        models::{partial_request::PartialHttpRequest, request::HttpRequest, uri::Uri},
+        models::{partial_request::PartialHttpRequest, request::HttpRequest},
     };
 
     use pretty_assertions::assert_eq;
@@ -167,7 +167,7 @@ mod from_partial_request_tests {
 
         assert_eq!(
             Ok(HttpRequest {
-                uri: Uri::new("https://example.com"),
+                uri: "https://example.com".into(),
                 method: "GET".into(),
                 http_version: "HTTP/1.1".into(),
                 headers: vec!["x-api-key: abc123".into()],

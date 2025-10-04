@@ -1,5 +1,5 @@
 use http_message::{
-    models::{HttpRequest, ParsedHttpRequest, Uri},
+    models::{HttpRequest, ParsedHttpRequest},
     parse_request,
 };
 
@@ -23,7 +23,7 @@ fn main() {
 
     assert_eq!(
         HttpRequest {
-            uri: Uri::new("https://example.com"),
+            uri: "https://example.com".into(),
             method: "GET".into(),
             http_version: "HTTP/1.1".into(),
             headers: vec![("x-key", "123").into()],

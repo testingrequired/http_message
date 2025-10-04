@@ -22,3 +22,9 @@ impl fmt::Display for Uri {
         write!(f, "{}", self.0)
     }
 }
+
+impl From<&str> for Uri {
+    fn from(value: &str) -> Self {
+        Self::new(value)
+    }
+}
