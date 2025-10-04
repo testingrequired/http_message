@@ -42,7 +42,7 @@ A `ParsedHttpRequest` contains the spans for `method`, `uri`, `http_version`, `h
 
 ```rust
 use http_message::{
-    models::{HttpRequest, ParsedHttpRequest, Uri},
+    models::{HttpRequest, ParsedHttpRequest},
     parse_request,
 };
 
