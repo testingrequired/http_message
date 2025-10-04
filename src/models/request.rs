@@ -6,7 +6,7 @@ use crate::models::{
     version::HttpVersion,
 };
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum HttpMethod {
     GET,
     POST,
@@ -33,7 +33,7 @@ impl From<&str> for HttpMethod {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct HttpRequest {
     pub uri: Uri,
     pub method: HttpMethod,
@@ -96,7 +96,7 @@ impl HttpBody for HttpRequest {
     }
 }
 
-impl<'a> From<PartialHttpRequest> for HttpRequest {
+impl<'a> From<PartialHttpRequest<'a>> for HttpRequest {
     fn from(value: PartialHttpRequest) -> Self {
         Self {
             uri: Uri::new(&value.uri_str().expect("should have a uri")),

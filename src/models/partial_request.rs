@@ -9,9 +9,9 @@ use crate::{
 /// A partial HTTP request that might not conform to HTTP spec
 ///
 /// A templated HTTP request message is an example use case.
-#[derive(Debug, Clone, PartialEq)]
-pub struct PartialHttpRequest {
-    message: String,
+#[derive(Debug, PartialEq)]
+pub struct PartialHttpRequest<'http_message> {
+    message: &'http_message str,
     method: Option<Range<usize>>,
     uri: Option<Range<usize>>,
     http_version: Option<Range<usize>>,
@@ -19,19 +19,19 @@ pub struct PartialHttpRequest {
     body: Option<Range<usize>>,
 }
 
-impl fmt::Display for PartialHttpRequest {
+impl<'http_message> fmt::Display for PartialHttpRequest<'http_message> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.message())
     }
 }
 
-impl PartialHttpRequest {
-    pub fn from_str(message: &str) -> Result<Self, Error> {
+impl<'http_message> PartialHttpRequest<'http_message> {
+    pub fn from_str(message: &'http_message str) -> Result<Self, Error> {
         parse_request(message, parse_first_line)
     }
 
     pub fn parsed(
-        message: &str,
+        message: &'http_message str,
         method: Option<Range<usize>>,
         uri: Option<Range<usize>>,
         http_version: Option<Range<usize>>,
@@ -39,7 +39,7 @@ impl PartialHttpRequest {
         body: Option<Range<usize>>,
     ) -> Self {
         let partial = Self {
-            message: message.to_string(),
+            message,
             method,
             uri,
             http_version,
@@ -173,7 +173,7 @@ fn assert_text_span(text: &str, span: &Range<usize>) {
         .expect(&format!("span {:?} is outside of text bounds", span));
 }
 
-impl Default for PartialHttpRequest {
+impl<'http_message> Default for PartialHttpRequest<'http_message> {
     fn default() -> Self {
         Self::from_str("GET https://example.com HTTP/1.1").unwrap()
     }
@@ -185,7 +185,10 @@ type FirstLineParts = (
     Option<Range<usize>>,
 );
 
-fn parse_request<F>(input: &str, parse_first_line: F) -> Result<PartialHttpRequest, Error>
+fn parse_request<'http_message, F>(
+    input: &'http_message str,
+    parse_first_line: F,
+) -> Result<PartialHttpRequest<'http_message>, Error>
 where
     F: Fn(&str) -> FirstLineParts,
 {
