@@ -1,7 +1,4 @@
-use http_message::{
-    PartialHttpRequest,
-    models::{request::HttpRequest, uri::Uri},
-};
+use http_message::{PartialHttpRequest, error::Error, models::request::HttpRequest};
 
 fn main() {
     let partial = PartialHttpRequest::from_str("GET https://example.com\nx-key: 123").unwrap();
@@ -18,16 +15,7 @@ fn main() {
     assert_eq!(Some(&(24..34)), partial.header_span("x-key"));
     assert_eq!(Some("x-key: 123"), partial.header_str("x-key"));
 
-    let request: HttpRequest = partial.into();
+    let request: Result<HttpRequest, Error> = partial.try_into();
 
-    assert_eq!(
-        HttpRequest {
-            uri: Uri::new("https://example.com"),
-            method: "GET".into(),
-            http_version: "HTTP/1.1".into(),
-            headers: vec![("x-key", "123").into()],
-            body: None
-        },
-        request
-    );
+    assert_eq!(Err(Error::missing_required("http_version")), request);
 }

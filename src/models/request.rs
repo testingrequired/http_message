@@ -1,9 +1,13 @@
-use crate::models::{
-    body::{HttpBody, PossibleHttpBody},
-    headers::HttpHeader,
-    partial_request::PartialHttpRequest,
-    uri::Uri,
-    version::HttpVersion,
+use crate::{
+    error::Error,
+    models::{
+        body::{HttpBody, PossibleHttpBody},
+        headers::HttpHeader,
+        parsed_request::ParsedHttpRequest,
+        partial_request::PartialHttpRequest,
+        uri::Uri,
+        version::HttpVersion,
+    },
 };
 
 #[derive(Debug, PartialEq)]
@@ -96,29 +100,56 @@ impl HttpBody for HttpRequest {
     }
 }
 
-impl<'a> From<PartialHttpRequest<'a>> for HttpRequest {
-    fn from(value: PartialHttpRequest) -> Self {
-        Self {
-            uri: Uri::new(&value.uri_str().expect("should have a uri")),
-            method: value.method_str().expect("should have a method").into(),
+impl<'a> TryFrom<PartialHttpRequest<'a>> for HttpRequest {
+    type Error = Error;
+
+    fn try_from(value: PartialHttpRequest<'a>) -> Result<Self, Self::Error> {
+        let method = value
+            .method_str()
+            .ok_or(Error::missing_required("method"))?;
+
+        let uri = value.uri_str().ok_or(Error::missing_required("uri"))?;
+
+        let http_version = value
+            .http_version_str()
+            .ok_or(Error::missing_required("http_version"))?;
+
+        Ok(Self {
+            uri: Uri::new(uri),
+            method: method.into(),
             headers: value
                 .header_strs()
                 .into_iter()
                 .map(|header| header.into())
                 .collect(),
             body: value.body_str().map(|body| body.to_string()),
-            http_version: value
-                .http_version_str()
-                .map(|version| HttpVersion::new(&version))
-                .or(Some("HTTP/1.1".into()))
-                .unwrap(),
+            http_version: http_version.into(),
+        })
+    }
+}
+
+impl<'a> From<ParsedHttpRequest<'a>> for HttpRequest {
+    fn from(value: ParsedHttpRequest) -> Self {
+        Self {
+            uri: Uri::new(&value.uri_str()),
+            method: value.method_str().into(),
+            headers: value
+                .header_strs()
+                .into_iter()
+                .map(|header| header.into())
+                .collect(),
+            body: value.body_str().map(|body| body.to_string()),
+            http_version: value.http_version_str().into(),
         }
     }
 }
 
 #[cfg(test)]
 mod from_partial_request_tests {
-    use crate::models::{partial_request::PartialHttpRequest, request::HttpRequest, uri::Uri};
+    use crate::{
+        error::Error,
+        models::{partial_request::PartialHttpRequest, request::HttpRequest, uri::Uri},
+    };
 
     use pretty_assertions::assert_eq;
 
@@ -136,16 +167,16 @@ mod from_partial_request_tests {
             None,
         );
 
-        let request: HttpRequest = partial_request.into();
+        let request: Result<HttpRequest, Error> = partial_request.try_into();
 
         assert_eq!(
-            HttpRequest {
+            Ok(HttpRequest {
                 uri: Uri::new("https://example.com"),
                 method: "GET".into(),
                 http_version: "HTTP/1.1".into(),
                 headers: vec!["x-api-key: abc123".into()],
                 body: None,
-            },
+            }),
             request
         );
     }

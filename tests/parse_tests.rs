@@ -1,4 +1,5 @@
 use http_message::PartialHttpRequest;
+use http_message::error::Error;
 use http_message::models::{request::HttpRequest, uri::Uri};
 
 use pretty_assertions::assert_eq;
@@ -38,16 +39,16 @@ fn parse_get_request() {
         partial
     );
 
-    let request: HttpRequest = partial.into();
+    let request: Result<HttpRequest, Error> = partial.try_into();
 
     assert_eq!(
-        HttpRequest {
+        Ok(HttpRequest {
             uri: Uri::new("https://example.com"),
             method: "GET".into(),
             http_version: "HTTP/1.1".into(),
             headers: vec![],
             body: None
-        },
+        }),
         request
     );
 }
@@ -56,25 +57,23 @@ fn parse_get_request() {
 fn parse_get_without_http_version_request() {
     let content = include_str!("../tests/fixtures/get_without_http_version.request");
 
-    let partial = PartialHttpRequest::from_str(&content).expect("should be parsable");
+    let partial = PartialHttpRequest::from_str(&content);
 
     assert_eq!(
-        PartialHttpRequest::parsed(content, Some(0..3), Some(4..23), None, vec![], None),
+        Ok(PartialHttpRequest::parsed(
+            content,
+            Some(0..3),
+            Some(4..23),
+            None,
+            vec![],
+            None
+        )),
         partial
     );
 
-    let request: HttpRequest = partial.into();
+    let request: Result<HttpRequest, Error> = partial.unwrap().try_into();
 
-    assert_eq!(
-        HttpRequest {
-            uri: Uri::new("https://example.com"),
-            method: "GET".into(),
-            http_version: "HTTP/1.1".into(),
-            headers: vec![],
-            body: None
-        },
-        request
-    );
+    assert_eq!(Err(Error::missing_required("http_version")), request);
 }
 
 #[test]
@@ -95,16 +94,16 @@ fn parse_get_with_headers_request() {
         partial
     );
 
-    let request: HttpRequest = partial.into();
+    let request: Result<HttpRequest, Error> = partial.try_into();
 
     assert_eq!(
-        HttpRequest {
+        Ok(HttpRequest {
             uri: Uri::new("https://example.com"),
             method: "GET".into(),
             http_version: "HTTP/1.1".into(),
             headers: vec!["x-api-key: abc123".into()],
             body: None
-        },
+        }),
         request
     );
 }
@@ -126,16 +125,16 @@ fn parse_post_with_headers_and_body_request() {
         partial
     );
 
-    let request: HttpRequest = partial.into();
+    let request: Result<HttpRequest, Error> = partial.try_into();
 
     assert_eq!(
-        HttpRequest {
+        Ok(HttpRequest {
             uri: Uri::new("https://example.com"),
             method: "POST".into(),
             http_version: "HTTP/1.1".into(),
             headers: vec!["x-api-key: abc123".into()],
             body: Some(String::from(r#"{"id": 100}"#))
-        },
+        }),
         request
     );
 }
@@ -158,16 +157,16 @@ fn parse_post_with_body_request() {
         partial
     );
 
-    let request: HttpRequest = partial.into();
+    let request: Result<HttpRequest, Error> = partial.try_into();
 
     assert_eq!(
-        HttpRequest {
+        Ok(HttpRequest {
             uri: Uri::new("https://example.com"),
             method: "POST".into(),
             http_version: "HTTP/1.1".into(),
             headers: vec![],
             body: Some(String::from(r#"{"id": 100}"#))
-        },
+        }),
         request
     );
 }
@@ -190,16 +189,16 @@ fn parse_get_with_multiple_spaces_request() {
         partial
     );
 
-    let request: HttpRequest = partial.into();
+    let request: Result<HttpRequest, Error> = partial.try_into();
 
     assert_eq!(
-        HttpRequest {
+        Ok(HttpRequest {
             uri: Uri::new("https://example.com"),
             method: "GET".into(),
             http_version: "HTTP/1.1".into(),
             headers: vec![],
             body: None
-        },
+        }),
         request
     );
 }

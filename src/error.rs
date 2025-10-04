@@ -1,7 +1,17 @@
 use snafu::prelude::*;
 
-#[derive(Debug, Snafu)]
+#[derive(Debug, Snafu, PartialEq)]
 pub enum Error {
-    #[snafu(display("ID may not be less than 10, but it was {id}"))]
-    InvalidId { id: u16 },
+    #[snafu(display("HTTP Message strings can't be empty"))]
+    EmptyHttpMessage,
+    #[snafu(display("Required but not found: {key}"))]
+    MissingRequired { key: String },
+}
+
+impl Error {
+    pub fn missing_required(key: &str) -> Self {
+        Self::MissingRequired {
+            key: key.to_string(),
+        }
+    }
 }
